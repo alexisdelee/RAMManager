@@ -3,6 +3,7 @@ package Simultator;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.zip.CRC32;
+import java.util.UUID;
 
 public class Processus {
 	protected String name_;
@@ -20,7 +21,7 @@ public class Processus {
 		
 		this.name_ = name;
 		this.size_ = size;
-		this.id_ = setId(name);
+		this.id_ = setId();
 	}
 	
 	public void setName_(String name_) {
@@ -39,9 +40,11 @@ public class Processus {
 		return this.size_;
 	}
 
-	private String setId(String name) {
+	private String setId() {
+		String suuid = UUID.randomUUID().toString();
+		
 		CRC32 crc = new CRC32();
-		crc.update(name.getBytes());
+		crc.update(suuid.getBytes());
 		return Long.toHexString(crc.getValue());
 	}
 	

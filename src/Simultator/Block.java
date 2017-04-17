@@ -20,6 +20,10 @@ public class Block extends Processus {
 	}
 	
 	public long getSizeProcess_() {
-		return this.getSize_();
+		return this.process_.getSize_();
+	}
+	
+	public String toString() {
+		return "Block [" + this.max_block_size_ + " bits maximum, " + this.block_used_ + " blocks used, " + this.process_ + "]";
 	}
 }

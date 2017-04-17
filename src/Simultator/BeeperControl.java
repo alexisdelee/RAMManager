@@ -36,19 +36,22 @@ public class BeeperControl {
 					program_.add("Windows Shell Experience Host");
 					program_.add("Apache HTTP Server");
 					
-					String he_is_the_elected = program_.get((int)Utils.random(0, program_.size() - 1));
+					int request = (int)Utils.random(1, 100);
 					
-					int option = Utils.random(1, 2);
-					switch(option) {
-						case 1:
-							program_size_ = Utils.memory(Utils.random(60, 999), Utils.KILO_BYTE);
-						case 2:
-							program_size_ = Utils.memory(Utils.random(1, 366), Utils.MEGA_BYTE);
+					if(request <= 65) { // 65% de chance de demander une allocation de mémoire
+						String he_is_the_elected = program_.get((int)Utils.random(0, program_.size() - 1));
+						
+						int option = Utils.random(1, 2);
+						switch(option) {
+							case 1:
+								program_size_ = Utils.memory(Utils.random(60, 999), Utils.KILO_BYTE); // on convertit toutes les données en bits grâce à la méthode "memory"
+							case 2:
+								program_size_ = Utils.memory(Utils.random(1, 366), Utils.MEGA_BYTE);
+						}
+						ram.init(he_is_the_elected, Utils.memory(program_size_, Utils.BIT));
+					} else { // 35% de chance de demander une libération de mémoire
+						ram.kill();
 					}
-					ram.init(he_is_the_elected, Utils.memory(program_size_, Utils.BIT));
-					// ram.kill(process);
-					
-					ram.state();
 				} catch (fullMemory e) {
 					System.out.println("Exception: maximum limit of the affected RAM");
 				}

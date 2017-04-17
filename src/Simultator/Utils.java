@@ -17,11 +17,11 @@ public class Utils {
 		if((measure & BYTE) != 0) {
 			return value * 8;
 		} if((measure & KILO_BYTE) != 0) {
-			return value * 8 * 1000;
+			return value * 8 * 1024;
 		} else if((measure & MEGA_BYTE) != 0) {
-			return value * 8 * 1000 * 1000;
+			return value * 8 * 1024 * 1024;
 		} else if((measure & GIGA_BYTE) != 0) {
-			return value * 8 * 1000 * 1000 * 1000;
+			return value * 8 * 1024 * 1024 * 1024;
 		}
 		
 		return value;

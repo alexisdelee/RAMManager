@@ -8,7 +8,7 @@ public class Main {
 		try {
 			BeeperControl manager = new BeeperControl(DELAY, REPETITION);
 			
-			manager.ram = new RAMManager(Utils.memory(1, Utils.GIGA_BYTE)); // initialise le gestionnaire de RAM
+			manager.ram = new RAMManager(Utils.memory(657, Utils.MEGA_BYTE)); // initialise le gestionnaire de RAM
 			System.out.println(manager.ram + "\n");
 			
 			manager.start();

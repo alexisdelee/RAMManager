@@ -22,13 +22,12 @@ public class RAMManager {
 		if((max_size & (max_size - 1)) == 0) { // si c'est une puissance de deux
 			this.max_size_ = max_size; // on la stocke
 		} else {
-			this.max_size_ = max_size - 1; // sinon on récupère la plus haute puissance de deux la plus proche
-			this.max_size_ |= this.max_size_ >> 1;
-			this.max_size_ |= this.max_size_ >> 2;
-			this.max_size_ |= this.max_size_ >> 4;
-			this.max_size_ |= this.max_size_ >> 8;
-			this.max_size_ |= this.max_size_ >> 16;
-			this.max_size_++;
+			this.max_size_ = max_size | (max_size >> 1); // sinon on récupère la puissance de deux juste en dessous
+			this.max_size_ = this.max_size_ | (this.max_size_ >> 2);
+			this.max_size_ = this.max_size_ | (this.max_size_ >> 4);
+			this.max_size_ = this.max_size_ | (this.max_size_ >> 8);
+			this.max_size_ = this.max_size_ | (this.max_size_ >> 16);
+			this.max_size_ = this.max_size_ - (this.max_size_ >> 1);
 			
 			System.out.println("Warning: limited memory size, only " + this.max_size_ + " out of " + max_size + " bits will be used");
 		}
@@ -49,14 +48,13 @@ public class RAMManager {
 		
 		if((max_size & (max_size - 1)) == 0) { // si c'est une puissance de deux
 			this.max_size_ = max_size; // on la stocke
-		} else {
-			this.max_size_ = max_size - 1; // sinon on récupère la plus haute puissance de deux la plus proche
-			this.max_size_ |= this.max_size_ >> 1;
-			this.max_size_ |= this.max_size_ >> 2;
-			this.max_size_ |= this.max_size_ >> 4;
-			this.max_size_ |= this.max_size_ >> 8;
-			this.max_size_ |= this.max_size_ >> 16;
-			this.max_size_++;
+		} else {			
+			this.max_size_ = max_size | (max_size >> 1); // sinon on récupère la puissance de deux juste en dessous
+			this.max_size_ = this.max_size_ | (this.max_size_ >> 2);
+			this.max_size_ = this.max_size_ | (this.max_size_ >> 4);
+			this.max_size_ = this.max_size_ | (this.max_size_ >> 8);
+			this.max_size_ = this.max_size_ | (this.max_size_ >> 16);
+			this.max_size_ = this.max_size_ - (this.max_size_ >> 1);
 			
 			System.out.println("Warning: limited memory size, only " + this.max_size_ + " out of " + max_size + " bits will be used");
 		}
@@ -73,37 +71,54 @@ public class RAMManager {
 		try {			
 			if(this.full_) {
 				throw new fullMemory();
-			} /* else if(this.remaining_memory_ - size_process < 0) {
-				System.out.println("Exception: " + program + " program was interrupted; insufficient RAM remaining");
-				return;
-			} */
-			
-			Processus process = new Processus(program, size_process);
-			if(this.memory_.contains(process)) {
-				this.memory_.remove(process);
-				
-				if(this.remaining_memory_ - size_process < 0) {
-					System.out.println("Exception: " + program + " program was interrupted; insufficient RAM remaining");
-					return;
-				}
-			} else if(this.remaining_memory_ - size_process < 0) {
+			} else if(this.remaining_memory_ - size_process < 0) { // s'il n'y a pas suffisament de place, on renvoie une erreur
+				this.LoadingBar();
 				System.out.println("impossible to create new process: " + program + " [" + size_process + " bits]");
 				return;
 			}
 			
+			Processus process = new Processus(program, size_process);
+			
 			this.memory_.add(new Block(process, this.max_block_size_));
 			this.remaining_memory_ -= size_process;
 			
-			this.full_ = this.remaining_memory_> 0 ? false : true;
+			this.full_ = this.remaining_memory_ > 0 ? false : true;
+			
+			this.LoadingBar(); // affichage de la barre de chargement
+			this.state(this.memory_.get(this.memory_.size() - 1)); // affichage des proriétés du processsus créé
 		} catch(InvalidSize e) {
 			System.out.println("Exception: invalid format for size");
 		}
 	}
 	
-	public void state() {		
-		for(Block block: memory_) {
-			System.out.println(block.getProcess_() + "[" + Math.round((double)block.getProcess_().getSize_() / this.max_size_ * 100) + "%]");
+	public void kill() {
+		if(this.memory_.size() > 0) { // uniquement si la mémoire n'est pas vide
+			int elu = (int)Utils.random(0, this.memory_.size() - 1);
+			Block he_is_the_elected = this.memory_.get(elu);
+			this.memory_.remove(elu);
+			
+			long sizeProcess = he_is_the_elected.getSizeProcess_();
+			this.remaining_memory_ += sizeProcess; // on lui remet de la mémoire
+			
+			this.LoadingBar();
+			System.out.println("free " + he_is_the_elected.getProcess_());
 		}
+	}
+	
+	private void state(Block block) {		
+		System.out.println(block.getProcess_() + "[" + Math.round((double)block.getProcess_().getSize_() / this.max_size_ * 100) + "%]");
+	}
+	
+	private int stateMemory() {
+		return (int)Math.ceil(((double)(this.max_size_ - this.remaining_memory_) / this.max_size_) * 100); // renvoie l'état de la mémoire sous forme de pourcentage d'entier
+	}
+	
+	private void LoadingBar() {
+		int percent = this.stateMemory();
+		
+		String loadingBar = "[" + percent + "%][" + String.format("%0" + percent + "d", 0).replace("0", "*");
+		loadingBar += String.format("%0" + (100 - percent) + "d", 0).replace("0", " ") + "] ";
+		System.out.print(loadingBar);
 	}
 	
 	public void clear() {
